@@ -10,6 +10,10 @@
 #include <pthread.h>
 #include <time.h>
 
+#include <ctype.h>
+#include <sys/syscall.h>
+#include <sys/mman.h>
+
 #define ANSI_COLOR_GRAY "\x1b[30m"
 #define ANSI_COLOR_RED "\x1b[31m"
 #define ANSI_COLOR_GREEN "\x1b[32m"
@@ -58,7 +62,7 @@ int main(int argc, char* argv[])
         threadData[i].data = data;
         threadData[i].numVals = SIZE;
         threadData[i].lock = &lock;
-        threadData[i].totalSum = totalSum;
+        threadData[i].totalSum = &totalSum;
     }
 
     pthread_t threads[numberOfThreads];
@@ -113,7 +117,7 @@ void print_progress(pid_t localTid, size_t value) {
 
 void *arraySum(void * a)
 {
-    thread_data_t* threadData = (thread_data_t)a;
+    thread_data_t* threadData = (thread_data_t*)a;
     long long int threadSum=0;
     while(1)
     {
@@ -122,7 +126,8 @@ void *arraySum(void * a)
         {
             struct timespec start;
             clock_gettime(CLOCK_REALTIME, &start);
-            struct timespec end ;
+            threadSum += threadData->data[i];
+            struct timespec end;
             clock_gettime(CLOCK_REALTIME, &end);
             long latency = (end.tv_sec - start.tv_sec)*1000000000 + (end.tv_nsec - start.tv_nsec);
             if(latency_max < latency)
@@ -130,5 +135,10 @@ void *arraySum(void * a)
                 latency_max = latency;
             }
         }
+        pthread_mutex_lock(threadData->lock);
+        *threadData->totalSum += threadSum;
+        pthread_mutex_unlock(threadData->lock);
+        print_progress(threadData->localTid, latency_max);
     }
+    return NULL;
 }
