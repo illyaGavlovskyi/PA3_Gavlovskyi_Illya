@@ -118,7 +118,7 @@ void print_progress(pid_t localTid, size_t value) {
 void *arraySum(void * a)
 {
     thread_data_t* threadData = (thread_data_t*)a;
-    long long int threadSum=0;
+    long long int threadSum = 0;
     while(1)
     {
         long latency_max = 0;
