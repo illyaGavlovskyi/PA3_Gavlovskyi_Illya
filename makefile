@@ -1,4 +1,4 @@
 make: sched.o
-	gcc -o sched -Wall -pthread sched.c
+	gcc -o sched -pthread -Wall  sched.c
 clean: 
 	rm *o sched

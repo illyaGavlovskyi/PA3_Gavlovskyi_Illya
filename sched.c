@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
     {
         pthread_join(threads[i], NULL);
     }
-
+    return 0;
 }
 
 void print_progress(pid_t localTid, size_t value) {
@@ -109,4 +109,26 @@ void print_progress(pid_t localTid, size_t value) {
         printf("\b%c[2K\r%s\n", 27, buffer);
     fflush(stdout);
     free(buffer);
+}
+
+void *arraySum(void * a)
+{
+    thread_data_t* threadData = (thread_data_t)a;
+    long long int threadSum=0;
+    while(1)
+    {
+        long latency_max = 0;
+        for(int i = 0 ; i < threadData->numVals; i++)
+        {
+            struct timespec start;
+            clock_gettime(CLOCK_REALTIME, &start);
+            struct timespec end ;
+            clock_gettime(CLOCK_REALTIME, &end);
+            long latency = (end.tv_sec - start.tv_sec)*1000000000 + (end.tv_nsec - start.tv_nsec);
+            if(latency_max < latency)
+            {
+                latency_max = latency;
+            }
+        }
+    }
 }
